@@ -108,14 +108,20 @@ def pacing(p: Project, tl: Timeline) -> dict:
 def flash_shots(p: Project, tl: Timeline, edge: float = 0.6) -> list[str]:
     """Clips that contain a source camera change within `edge` s of their head/tail (a flash of another shot)."""
     out = []
+    lay = {l["id"]: l for l in tl.layout()}
+
+    def covered(t0: float, t1: float) -> bool:
+        return any(o.kind == "media" and o.full_frame and o.start <= t0 + 0.02 and o.start + o.duration >= t1 - 0.02 for o in tl.overlays)
+
     for c in tl.clips:
         sc = p.cache_get(c.media, "scenes") or []
+        L = lay[c.id]
         for s in sc[1:]:
             b = s["start"]
             if c.src_in < b < c.src_out:
-                if b - c.src_in < edge:
+                if b - c.src_in < edge and not covered(L["start"], L["start"] + (b - c.src_in) / c.speed):
                     out.append(f"{c.id}: source cut {b - c.src_in:.2f}s after head — trim_clip head={b - c.src_in + 0.02:.2f}")
-                elif c.src_out - b < edge:
+                elif c.src_out - b < edge and not covered(L["end"] - (c.src_out - b) / c.speed, L["end"]):
                     out.append(f"{c.id}: source cut {c.src_out - b:.2f}s before tail — trim_clip tail={c.src_out - b + 0.02:.2f}")
     return out
 

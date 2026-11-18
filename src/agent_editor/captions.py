@@ -99,7 +99,7 @@ def build_ass(tl: Timeline, words: list[dict], out: Path) -> Path:
                             seg.append(f"{{\\c{hl}&}}{t}{{\\r}}")
                         else:
                             seg.append(t)
-                    pop = "{\\fad(40,0)}" if k == 0 else ""
+                    pop = ""
                     dlg(ws, we, "Cap", pop + " ".join(seg))
 
     # ---------- text overlays (titles, lower thirds, free text)
