@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "agent-editor": {
+      "command": ".venv/bin/agent-editor-mcp",
+      "env": { "AE_PROJECT": "projects/default", "HF_HUB_DISABLE_XET": "1" }
+    }
+  }
+}
