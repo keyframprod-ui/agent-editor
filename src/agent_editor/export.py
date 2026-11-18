@@ -20,15 +20,36 @@ def _range(a: float, dur: float, rate: float) -> otio.opentime.TimeRange:
     return otio.opentime.TimeRange(_rt(a, rate), _rt(dur, rate))
 
 
+def seq_rate(fps: float) -> float:
+    """Exact NLE rate: 29.97 → 30000/1001 etc. (Premiere writes these as timebase 30 + NTSC)."""
+    for nominal in (24, 30, 60, 120):
+        if abs(fps - nominal * 1000 / 1001) < 0.01:
+            return nominal * 1000 / 1001
+    return float(round(fps, 3))
+
+
+_PATH_MAP: dict[str, str] = {}
+
+
+def _media_path(m: dict) -> str:
+    """Real source file, with optional prefix remapping (e.g. cloud path → path on the editor's Mac)."""
+    path = m.get("source_path") or str(Path(m["path"]).resolve())
+    for a, b in _PATH_MAP.items():
+        if path.startswith(a):
+            path = b + path[len(a):]
+            break
+    return path
+
+
 def _ref(p: Project, mid: str, rate: float) -> otio.schema.ExternalReference:
     m = p.media(mid)
-    mrate = m.get("fps") or rate
-    return otio.schema.ExternalReference(target_url=Path(m["path"]).resolve().as_uri(),
-                                         available_range=_range(0, m["duration"], mrate))
+    path = _media_path(m)
+    url = Path(path).as_uri() if path.startswith("/") else "file:///" + path.replace("\\", "/")
+    return otio.schema.ExternalReference(target_url=url, available_range=_range(0, m["duration"], rate))
 
 
 def to_otio(p: Project, tl: Timeline) -> otio.schema.Timeline:
-    rate = tl.fps
+    rate = seq_rate(tl.fps)
     ot = otio.schema.Timeline(name=tl.name, global_start_time=_rt(3600, rate))  # 01:00:00:00 like a real sequence
     ot.metadata["agent_editor"] = {"width": tl.width, "height": tl.height, "loudness_target": tl.loudness_target}
     v1 = otio.schema.Track(name="V1 A-roll", kind=otio.schema.TrackKind.Video)
@@ -36,7 +57,7 @@ def to_otio(p: Project, tl: Timeline) -> otio.schema.Timeline:
     lay = tl.layout()
     for i, (c, l) in enumerate(zip(tl.clips, lay)):
         m = p.media(c.media)
-        mrate = m.get("fps") or rate
+        mrate = rate
         head = l["overlap"] / 2 if i > 0 else 0.0
         nxt = lay[i + 1]["overlap"] / 2 if i + 1 < len(lay) else 0.0
         src_in = c.src_in + head * c.speed
@@ -78,7 +99,7 @@ def to_otio(p: Project, tl: Timeline) -> otio.schema.Timeline:
     if ov:
         def mk(o):
             def f(d):
-                m = p.media(o.media); mrate = m.get("fps") or rate
+                mrate = rate
                 return otio.schema.Clip(name=o.label or o.media, media_reference=_ref(p, o.media, rate),
                                         source_range=otio.opentime.TimeRange(_rt(o.src_in, mrate), _rt(d * o.speed, mrate)))
             return f
@@ -107,10 +128,19 @@ def to_otio(p: Project, tl: Timeline) -> otio.schema.Timeline:
     return ot
 
 
-def export(p: Project, tl: Timeline, formats: list[str] | None = None) -> dict[str, str]:
-    formats = formats or ["otio", "fcpxml", "premiere", "edl"]
+def export(p: Project, tl: Timeline, formats: list[str] | None = None,
+           path_map: dict[str, str] | None = None) -> dict[str, str]:
+    """formats: otio, fcpxml, premiere, edl. path_map rewrites media path prefixes, e.g.
+    {"/home/user/agent-editor/projects/x/media": "/Users/me/Movies/x"} when footage lives elsewhere on the NLE machine."""
+    formats = formats or ["premiere", "otio", "edl", "fcpxml"]
+    _PATH_MAP.clear(); _PATH_MAP.update(path_map or {})
     ot = to_otio(p, tl)
     out = {}
+    from .timeline import timeline_words
+    words = timeline_words(p, tl)
+    if words:  # caption sidecar Premiere imports as a caption track
+        from .captions import srt
+        out["captions_srt"] = str(srt(words, p.root / "exports" / f"{tl.name}_v{tl.version}.srt"))
     for f in formats:
         adapter, ext = FORMATS[f]
         dest = p.root / "exports" / f"{tl.name}_v{tl.version}{ext}"
