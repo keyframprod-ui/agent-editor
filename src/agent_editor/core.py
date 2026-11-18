@@ -124,6 +124,7 @@ class Project:
     def ingest(self, src: str, media_id: str | None = None, copy: bool = False, tags: list[str] | None = None) -> dict:
         """Register a file (local path or http(s) URL). Returns media record."""
         dest_dir = self.root / "media"
+        source_path = None
         if re.match(r"^https?://", src):
             name = Path(src.split("?")[0]).name or "download.mp4"
             dest = dest_dir / name
@@ -136,6 +137,7 @@ class Project:
             path = Path(src).expanduser().resolve()
             if not path.exists():
                 raise EditorError(f"file not found: {src}")
+            source_path = str(path)  # the real file (what NLEs should link to), not our symlink
             if copy or not str(path).startswith(str(self.root)):
                 dest = dest_dir / path.name
                 if not dest.exists():
@@ -150,7 +152,7 @@ class Project:
         base, n = mid, 2
         while mid in data["media"] and data["media"][mid]["path"] != str(path):
             mid, n = f"{base}_{n}", n + 1
-        rec = {"id": mid, "path": str(path), "tags": tags or [], **{k: v for k, v in info.items() if k != "path"}}
+        rec = {"id": mid, "path": str(path), "source_path": source_path or str(path), "tags": tags or [], **{k: v for k, v in info.items() if k != "path"}}
         data["media"][mid] = rec
         self.save(data)
         self.cache_dir(mid).mkdir(parents=True, exist_ok=True)

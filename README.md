@@ -31,6 +31,20 @@ footage ─▶ analyze ─────────────▶ timeline (JSON
 2. **Standalone agent:** `ae agent projects/demo "45s reel, strongest story, captions, music bed"` (needs `ANTHROPIC_API_KEY`).
 3. **CLI / Python:** `ae ingest`, `ae analyze`, `ae render`, `ae export`, or `agent_editor.timeline` directly.
 
+## Mac + Adobe Premiere Pro
+
+```bash
+brew install git                                        # Homebrew: https://brew.sh
+git clone https://github.com/keyframprod-ui/agent-editor ~/agent-editor
+cd ~/agent-editor && bash scripts/setup.sh              # FFmpeg, Inter font, Python deps, models (~2 GB)
+claude                                                  # Claude Code picks up the editor via .mcp.json
+```
+
+Ask Claude for an edit (e.g. *"Cut a 60 s reel from ~/Movies/Shoot, strongest story, captions"*). It exports
+`projects/<name>/exports/<timeline>_vN.xml` → in Premiere: **File → Import** the XML. The sequence opens linked
+to your original files (V1 A-roll, V2 B-roll, music/VO tracks, dissolves, titles as markers). Import the `.srt`
+next to it for captions. Grade with Lumetri; the agent's looks and loudness live only in its own renders.
+
 ## Install
 
 ```bash

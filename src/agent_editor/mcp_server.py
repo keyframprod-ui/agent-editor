@@ -406,10 +406,12 @@ def review_page(render_path: str, timeline: str = "main") -> str:
 
 
 @mcp.tool()
-def export_nle(timeline: str = "main", formats: list[str] | None = None) -> str:
-    """Export to editing apps: otio, fcpxml (Final Cut / Resolve), premiere (FCP7 XML for Premiere / Resolve), edl."""
+def export_nle(timeline: str = "main", formats: list[str] | None = None, path_map: dict[str, str] | None = None) -> str:
+    """Export to editing apps: premiere (XML for Premiere Pro: File > Import), otio (DaVinci Resolve), edl,
+    fcpxml (experimental). Also writes an .srt caption sidecar. path_map rewrites media path prefixes when the
+    footage lives at a different path on the editing machine: {"<path here>": "<path on that Mac>"}."""
     p = P()
-    return _ok(exp.export(p, T.load(p, timeline), formats))
+    return _ok(exp.export(p, T.load(p, timeline), formats, path_map))
 
 
 @mcp.resource("guide://editing")

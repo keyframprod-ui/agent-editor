@@ -106,3 +106,21 @@ def test_export_and_review(proj):
     q = review.qc(r["path"], tl.duration, tl.loudness_target)
     assert q["resolution"] == "960x540"
     assert review.sheet(proj, tl, r["path"]).exists()
+
+
+def test_premiere_xml_timing(proj):
+    """25 fps media in a 30 fps sequence: every clip lands on the right frame; real source path; SRT sidecar."""
+    import xml.etree.ElementTree as ET
+    tl = T.new(proj, "t7", "youtube")
+    T.add_clip(proj, tl, "a", 0.5, 2.5)
+    T.add_clip(proj, tl, "b", 1.0, 3.0)
+    T.save(proj, tl)
+    out = export.export(proj, tl, ["premiere"], path_map={"/": "/Volumes/Footage/"})
+    seq = ET.parse(out["premiere"]).getroot().find(".//sequence")
+    tb = int(seq.find("rate/timebase").text)
+    assert tb == 30
+    assert int(seq.find("duration").text) == round(tl.duration * 30)
+    items = [x for x in seq.find("media/video/track") if x.tag == "clipitem"]
+    assert [(int(i.find("start").text), int(i.find("end").text)) for i in items] == [(0, 60), (60, 120)]
+    assert int(items[1].find("in").text) == 30
+    assert ET.parse(out["premiere"]).getroot().find(".//pathurl").text.startswith("file:///Volumes/Footage/")
