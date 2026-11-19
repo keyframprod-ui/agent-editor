@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Search open video archives for each beat of a storyboard and download usable clips into a folder.
 
+Pixabay is searched too when PIXABAY_API_KEY is set (export it in your shell; never commit it).
+
 Sources (licence-filtered — only material that allows commercial reuse with attribution, or public domain):
   * Wikimedia Commons video (CC0, PD, CC BY, CC BY-SA, FAL)
   * Internet Archive "movies" with a Creative Commons / public-domain licence URL
@@ -27,7 +29,7 @@ import urllib.request
 from pathlib import Path
 
 UA = {"User-Agent": "AgentEditorArchive/0.2 (https://github.com/keyframprod-ui/agent-editor; low-volume CC media research)"}
-OK_LICENSES = re.compile(r"(cc0|public domain|pdm|cc by(-sa)?( \d\.\d)?\b|free art|fal\b|creativecommons\.org/(licenses/(by|by-sa)/|publicdomain))", re.I)
+OK_LICENSES = re.compile(r"(pixabay content license|pexels license|cc0|public domain|pdm|cc by(-sa)?( \d\.\d)?\b|free art|fal\b|creativecommons\.org/(licenses/(by|by-sa)/|publicdomain))", re.I)
 BAD_LICENSES = re.compile(r"(-nc|-nd|noncommercial|noderivs|non-commercial)", re.I)
 
 
@@ -119,6 +121,28 @@ def ia_search(query: str, limit: int = 10) -> list[dict]:
     return out
 
 
+def pixabay_search(query: str, limit: int = 10) -> list[dict]:
+    """Pixabay videos (Pixabay Content License: free commercial use, no attribution required). Needs PIXABAY_API_KEY."""
+    import os
+    key = os.environ.get("PIXABAY_API_KEY")
+    if not key:
+        return []
+    url = "https://pixabay.com/api/videos/?" + urllib.parse.urlencode({"key": key, "q": query[:100], "per_page": max(3, limit), "safesearch": "true"})
+    d = get_json(url, tries=2, wait=5)
+    out = []
+    for h in d.get("hits", []):
+        v = h.get("videos", {})
+        best = next((v[k] for k in ("large", "medium", "small") if v.get(k, {}).get("url")), None)
+        if not best:
+            continue
+        out.append({"source": "Pixabay", "title": f"pixabay_{h['id']}_{(h.get('tags') or '').replace(', ', '_')[:50]}",
+                    "license": "Pixabay Content License", "creator": h.get("user", ""), "date": "",
+                    "duration": h.get("duration") or 0, "width": best.get("width") or 0, "height": best.get("height") or 0,
+                    "page": h.get("pageURL"), "download": best["url"], "size": best.get("size") or 0,
+                    "description": h.get("tags", ""), "ext": ".mp4"})
+    return out
+
+
 def usable(c: dict, beat: dict) -> tuple[bool, str]:
     lic = c["license"] or ""
     if not OK_LICENSES.search(lic) or BAD_LICENSES.search(lic):
@@ -156,7 +180,7 @@ def main():
     ap.add_argument("--max-per-beat", type=int, default=3)
     ap.add_argument("--max-mb", type=float, default=400)
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--sources", default="commons,ia")
+    ap.add_argument("--sources", default="commons,ia,pixabay")
     a = ap.parse_args()
     plan = json.load(open(a.plan))
     out = Path(a.outdir).expanduser(); out.mkdir(parents=True, exist_ok=True)
@@ -171,6 +195,8 @@ def main():
                 cands += commons_search(q); time.sleep(3)
             if "ia" in a.sources:
                 cands += ia_search(q); time.sleep(2)
+            if "pixabay" in a.sources:
+                cands += pixabay_search(q); time.sleep(1)
         picked = 0
         for c in cands:
             if c["download"] in seen or picked >= a.max_per_beat:
@@ -179,7 +205,7 @@ def main():
             if not ok:
                 continue
             seen.add(c["download"])
-            ext = Path(urllib.parse.urlparse(c["download"]).path).suffix or ".webm"
+            ext = c.get("ext") or Path(urllib.parse.urlparse(c["download"]).path).suffix or ".webm"
             name = re.sub(r"[^\w\-]+", "_", Path(c["title"]).stem)[:70] + ext
             dest = out / beat["id"] / name
             dest.parent.mkdir(exist_ok=True)
