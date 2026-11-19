@@ -47,6 +47,12 @@ QUALITY = {
 }
 
 
+# Editorial names → FFmpeg xfade names. FFmpeg's own "dissolve" is a random *pixel* dissolve;
+# editors mean a crossfade. "pixel_dissolve" keeps the FFmpeg effect available.
+XFADE_MAP = {"dissolve": "fade", "crossfade": "fade", "cross_dissolve": "fade", "pixel_dissolve": "dissolve",
+             "dip_to_black": "fadeblack", "dip_to_white": "fadewhite"}
+
+
 def _even(x: float) -> int:
     return max(2, int(round(x / 2)) * 2)
 
@@ -216,7 +222,8 @@ def join(p: Project, tl: Timeline, segs: list[Path], out: Path) -> Path:
             acc_d += lay[i]["duration"]
         else:
             off = acc_d - d
-            fc.append(f"[{acc_v}][v{i}]xfade=transition={c.transition.type}:duration={d:.3f}:offset={off:.3f}[{nv}]")
+            xf = XFADE_MAP.get(c.transition.type, c.transition.type)
+            fc.append(f"[{acc_v}][v{i}]xfade=transition={xf}:duration={d:.3f}:offset={off:.3f}[{nv}]")
             fc.append(f"[{acc_a}][a{i}]acrossfade=d={d:.3f}:c1=tri:c2=tri[{na}]")
             acc_d += lay[i]["duration"] - d
         acc_v, acc_a = nv, na

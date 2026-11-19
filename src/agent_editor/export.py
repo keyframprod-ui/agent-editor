@@ -45,7 +45,8 @@ def _ref(p: Project, mid: str, rate: float) -> otio.schema.ExternalReference:
     m = p.media(mid)
     path = _media_path(m)
     url = Path(path).as_uri() if path.startswith("/") else "file:///" + path.replace("\\", "/")
-    return otio.schema.ExternalReference(target_url=url, available_range=_range(0, m["duration"], rate))
+    dur = 3600.0 if m.get("kind") == "image" else m["duration"]  # stills can be held indefinitely
+    return otio.schema.ExternalReference(target_url=url, available_range=_range(0, dur, rate))
 
 
 def to_otio(p: Project, tl: Timeline) -> otio.schema.Timeline:
@@ -103,7 +104,16 @@ def to_otio(p: Project, tl: Timeline) -> otio.schema.Timeline:
                 return otio.schema.Clip(name=o.label or o.media, media_reference=_ref(p, o.media, rate),
                                         source_range=otio.opentime.TimeRange(_rt(o.src_in, mrate), _rt(d * o.speed, mrate)))
             return f
-        ot.tracks.append(placed_track("V2 B-roll", otio.schema.TrackKind.Video, [(o.start, o.duration, mk(o)) for o in ov]))
+        # greedy lane allocation: overlapping overlays go on separate tracks (V2, V3, ...) instead of being trimmed
+        lanes: list[list] = []
+        for o in sorted(ov, key=lambda o: o.start):
+            for lane in lanes:
+                if lane[-1].start + lane[-1].duration <= o.start + 1e-3:
+                    lane.append(o); break
+            else:
+                lanes.append([o])
+        for n, lane in enumerate(lanes):
+            ot.tracks.append(placed_track(f"V{n + 2} Overlay", otio.schema.TrackKind.Video, [(o.start, o.duration, mk(o)) for o in lane]))
     ot.tracks.append(a1)
     for role in ("music", "vo", "sfx", "ambience", "dialogue"):
         items = [a for a in tl.audio if a.role == role]
@@ -126,6 +136,32 @@ def to_otio(p: Project, tl: Timeline) -> otio.schema.Timeline:
                                      color=otio.schema.MarkerColor.YELLOW)
             v1.markers.append(mk_)
     return ot
+
+
+def _premiere_format(path: Path, tl: Timeline) -> None:
+    """Write the sequence frame size into FCP7 XML so Premiere creates a WxH sequence (not its 1920x1080 default)."""
+    import xml.etree.ElementTree as ET
+    tree = ET.parse(path)
+    r = seq_rate(tl.fps)
+    tb, ntsc = (round(r * 1001 / 1000), "TRUE") if abs(r - round(r)) > 1e-3 else (int(round(r)), "FALSE")
+    for video in tree.getroot().iter("video"):
+        parent_seq = video  # only the sequence-level <video> (direct child of sequence/media)
+        if video.find("track") is None:
+            continue
+        for old in video.findall("format"):
+            video.remove(old)
+        fmt = ET.Element("format")
+        sc = ET.SubElement(fmt, "samplecharacteristics")
+        rate = ET.SubElement(sc, "rate")
+        ET.SubElement(rate, "timebase").text = str(tb)
+        ET.SubElement(rate, "ntsc").text = ntsc
+        ET.SubElement(sc, "width").text = str(tl.width)
+        ET.SubElement(sc, "height").text = str(tl.height)
+        ET.SubElement(sc, "anamorphic").text = "FALSE"
+        ET.SubElement(sc, "pixelaspectratio").text = "square"
+        ET.SubElement(sc, "fielddominance").text = "none"
+        video.insert(0, fmt)
+    tree.write(path, encoding="UTF-8", xml_declaration=True)
 
 
 def export(p: Project, tl: Timeline, formats: list[str] | None = None,
@@ -162,6 +198,8 @@ def export(p: Project, tl: Timeline, formats: list[str] | None = None,
                     out[f + "_note"] = "dissolves without source handles exported as cuts"
             else:
                 otio.adapters.write_to_file(ot, str(dest), adapter_name=adapter)
+                if f == "premiere":
+                    _premiere_format(dest, tl)
             out[f] = str(dest)
         except Exception as e:  # keep going; report per-format failures
             out[f] = f"ERROR: {e}"

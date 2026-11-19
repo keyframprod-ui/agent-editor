@@ -31,7 +31,7 @@ PRESETS = {
     "cinema": (2048, 858, 24), "scope": (1920, 804, 24), "flat": (1998, 1080, 24),
 }
 
-XFADE_TYPES = ["fade", "dissolve", "fadeblack", "fadewhite", "wipeleft", "wiperight", "wipeup", "wipedown", "slideleft",
+XFADE_TYPES = ["fade", "dissolve", "crossfade", "cross_dissolve", "pixel_dissolve", "dip_to_black", "dip_to_white", "fadeblack", "fadewhite", "wipeleft", "wiperight", "wipeup", "wipedown", "slideleft",
                "slideright", "slideup", "slidedown", "circleopen", "circleclose", "radial", "smoothleft", "smoothright",
                "zoomin", "pixelize", "hblur", "distance", "squeezeh", "squeezev", "diagtl", "rectcrop", "hlslice"]
 
