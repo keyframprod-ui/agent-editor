@@ -1,49 +1,266 @@
 {
-  "title": "QIA Davos 2027 · RESILIENCE · 03 Tourism — From Hosting Rights to a World Welcome",
-  "beats": [
-    {"id": "01_award_2000", "time": "00:00-00:06", "label": "12 Nov 2000: Doha awarded the 2006 Asian Games (Busan)",
-     "queries": ["2006 Asian Games Doha awarded", "Olympic Council of Asia Busan 2000"], "must": ["asian games", "doha", "olympic council"],
-     "fallback": "BBC News 12 Nov 2000 report (document); OCA / host broadcaster footage"},
-    {"id": "02_construction_2005", "time": "00:06-00:11", "label": "Khalifa Stadium / Aspire construction 2004-2006",
-     "queries": ["Khalifa International Stadium", "Aspire Tower Doha", "Aspire Zone Doha"], "must": ["khalifa", "aspire"],
-     "fallback": "Panos Pictures 02/2005 still; Arup / Aspire archive"},
-    {"id": "03_volunteers_2006", "time": "00:11-00:16", "label": "Doha 2006 workforce and volunteers",
-     "queries": ["Doha 2006 Asian Games volunteers", "Doha 2006 Asian Games"], "must": ["2006", "asian games", "doha"],
-     "fallback": "YouTube gPAW2qxquao (rights unclear) or a marked original shoot"},
-    {"id": "04_athletes_village_2006", "time": "00:16-00:20", "label": "Athletes' Village, opened 15 Nov 2006",
-     "queries": ["Asian Games Village Doha", "Doha 2006 athletes village"], "must": ["village", "doha"],
-     "fallback": "The Star, 18 Nov 2006 (document/still)"},
-    {"id": "05_empty_stadium_2006", "time": "00:20-00:24", "label": "Finished stadium, still empty",
-     "queries": ["Khalifa Stadium empty", "Doha stadium 2006"], "must": ["stadium"], "exclude": ["2022 fifa world cup match"],
-     "fallback": "Getty 72602120 (19 Nov 2006, stills)"},
-    {"id": "06_arrivals_airport_2006", "time": "00:24-00:28", "label": "Delegations arrive at the old Doha International Airport",
-     "queries": ["Doha International Airport", "Qatar Airways Doha airport landing"], "must": ["doha", "qatar airways"],
-     "fallback": "China Daily 29 Nov 2006; Al Jazeera 16 Nov 2006"},
-    {"id": "07_opening_ceremony_2006", "time": "00:28-00:32", "label": "1 Dec 2006 opening: rider lights the cauldron, fireworks",
-     "queries": ["2006 Asian Games opening ceremony", "Doha 2006 cauldron", "Doha Asian Games fireworks"], "must": ["2006", "asian games", "cauldron", "opening"],
-     "fallback": "YouTube kR4-aVejhtc (fan upload, licence from OCA / DAGBS); Getty 72690088"},
-    {"id": "08_museum_islamic_art", "time": "00:32-00:37", "label": "Museum of Islamic Art (2008): building on the water, atrium",
-     "queries": ["Museum of Islamic Art Doha"], "must": ["islamic art"], "fallback": "Al Jazeera 22 Nov 2008"},
-    {"id": "09_hamad_airport", "time": "00:37-00:42", "label": "Hamad International Airport (2014): Lamp Bear, Orchard",
-     "queries": ["Hamad International Airport", "Hamad airport Orchard", "Lamp Bear Doha"], "must": ["hamad", "lamp bear", "orchard"],
-     "fallback": "HIA Qatar official aerial (2023)"},
-    {"id": "10_arrivals_2017", "time": "00:42-00:47", "label": "Travellers arriving, passport control, visa-free entry 2017",
-     "queries": ["Hamad International Airport arrivals", "Doha airport passengers"], "must": ["hamad", "doha", "airport"],
-     "fallback": "CGTN 11 Aug 2017"},
-    {"id": "11_national_museum", "time": "00:47-00:52", "label": "National Museum of Qatar (2019): desert-rose discs",
-     "queries": ["National Museum of Qatar"], "must": ["national museum"], "fallback": "France 24, 28 Mar 2019"},
-    {"id": "12_doha_metro", "time": "00:52-00:58", "label": "Doha Metro (2019): train through the tunnel into a station",
-     "queries": ["Doha Metro", "Qatar Rail metro Doha"], "must": ["metro"], "fallback": "AFP 8 May 2019"},
-    {"id": "13_world_cup_2022", "time": "00:58-01:05", "label": "World Cup 2022, during the tournament: fans celebrate in Doha at night",
-     "queries": ["2022 FIFA World Cup Doha fans", "Doha Corniche World Cup 2022", "FIFA Fan Festival Doha"], "must": ["2022", "world cup", "fan"],
-     "fallback": "Getty 1448179814 (Anadolu, 10 Dec 2022) — licence needed"},
-    {"id": "14_souq_waqif", "time": "01:05-01:12", "label": "Souq Waqif, day into evening lamps",
-     "queries": ["Souq Waqif", "Souq Waqif night"], "must": ["souq"], "fallback": "original shoot"},
-    {"id": "15_inland_sea", "time": "01:12-01:18", "label": "Khor Al Adaid (Inland Sea): dunes meet the sea",
-     "queries": ["Khor Al Adaid", "Qatar inland sea dunes", "Qatar desert dunes"], "must": ["adaid", "udeid", "inland sea", "dune", "desert"],
-     "fallback": "original drone shoot"},
-    {"id": "16_corniche_skyline", "time": "01:18-01:26", "label": "Corniche and West Bay, golden hour into dusk",
-     "queries": ["Doha Corniche", "Doha skyline", "West Bay Doha"], "must": ["corniche", "skyline", "west bay", "doha"],
-     "fallback": "original time-lapse"}
-  ]
+ "title": "QIA Davos 2027 · RESILIENCE · 03 Tourism — From Hosting Rights to a World Welcome",
+ "beats": [
+  {
+   "id": "01_award_2000",
+   "time": "00:00-00:06",
+   "label": "12 Nov 2000: Doha awarded the 2006 Asian Games (Busan)",
+   "queries": [
+    "2006 Asian Games Doha awarded",
+    "Olympic Council of Asia Busan 2000"
+   ],
+   "must": [
+    "asian games",
+    "doha",
+    "olympic council"
+   ],
+   "fallback": "BBC News 12 Nov 2000 report (document); OCA / host broadcaster footage"
+  },
+  {
+   "id": "02_construction_2005",
+   "time": "00:06-00:11",
+   "label": "Khalifa Stadium / Aspire construction 2004-2006",
+   "queries": [
+    "Khalifa International Stadium",
+    "Aspire Tower Doha",
+    "Aspire Zone Doha"
+   ],
+   "must": [
+    "khalifa",
+    "aspire"
+   ],
+   "fallback": "Panos Pictures 02/2005 still; Arup / Aspire archive"
+  },
+  {
+   "id": "03_volunteers_2006",
+   "time": "00:11-00:16",
+   "label": "Doha 2006 workforce and volunteers",
+   "queries": [
+    "Doha 2006 Asian Games volunteers",
+    "Doha 2006 Asian Games"
+   ],
+   "must": [
+    "2006",
+    "asian games",
+    "doha"
+   ],
+   "fallback": "YouTube gPAW2qxquao (rights unclear) or a marked original shoot"
+  },
+  {
+   "id": "04_athletes_village_2006",
+   "time": "00:16-00:20",
+   "label": "Athletes' Village, opened 15 Nov 2006",
+   "queries": [
+    "Asian Games Village Doha",
+    "Doha 2006 athletes village"
+   ],
+   "must": [
+    "village",
+    "doha"
+   ],
+   "fallback": "The Star, 18 Nov 2006 (document/still)"
+  },
+  {
+   "id": "05_empty_stadium_2006",
+   "time": "00:20-00:24",
+   "label": "Finished stadium, still empty",
+   "queries": [
+    "Khalifa Stadium empty",
+    "Doha stadium 2006"
+   ],
+   "must": [
+    "stadium"
+   ],
+   "exclude": [
+    "2022 fifa world cup match"
+   ],
+   "fallback": "Getty 72602120 (19 Nov 2006, stills)"
+  },
+  {
+   "id": "06_arrivals_airport_2006",
+   "time": "00:24-00:28",
+   "label": "Delegations arrive at the old Doha International Airport",
+   "queries": [
+    "Doha International Airport",
+    "Qatar Airways Doha airport landing"
+   ],
+   "must": [
+    "doha",
+    "qatar airways"
+   ],
+   "fallback": "China Daily 29 Nov 2006; Al Jazeera 16 Nov 2006"
+  },
+  {
+   "id": "07_opening_ceremony_2006",
+   "time": "00:28-00:32",
+   "label": "1 Dec 2006 opening: rider lights the cauldron, fireworks",
+   "queries": [
+    "2006 Asian Games opening ceremony",
+    "Doha 2006 cauldron",
+    "Doha Asian Games fireworks"
+   ],
+   "must": [
+    "2006",
+    "asian games",
+    "cauldron",
+    "opening"
+   ],
+   "fallback": "YouTube kR4-aVejhtc (fan upload, licence from OCA / DAGBS); Getty 72690088"
+  },
+  {
+   "id": "08_museum_islamic_art",
+   "time": "00:32-00:37",
+   "label": "Museum of Islamic Art (2008): building on the water, atrium",
+   "queries": [
+    "Museum of Islamic Art Doha"
+   ],
+   "must": [
+    "islamic art"
+   ],
+   "fallback": "Al Jazeera 22 Nov 2008"
+  },
+  {
+   "id": "09_hamad_airport",
+   "time": "00:37-00:42",
+   "label": "Hamad International Airport (2014): Lamp Bear, Orchard",
+   "queries": [
+    "Hamad International Airport",
+    "Hamad airport Orchard",
+    "Lamp Bear Doha"
+   ],
+   "must": [
+    "hamad",
+    "lamp bear",
+    "orchard"
+   ],
+   "fallback": "HIA Qatar official aerial (2023)"
+  },
+  {
+   "id": "10_arrivals_2017",
+   "time": "00:42-00:47",
+   "label": "Travellers arriving, passport control, visa-free entry 2017",
+   "queries": [
+    "Hamad International Airport arrivals",
+    "Doha airport passengers"
+   ],
+   "must": [
+    "hamad",
+    "doha",
+    "airport"
+   ],
+   "fallback": "CGTN 11 Aug 2017"
+  },
+  {
+   "id": "11_national_museum",
+   "time": "00:47-00:52",
+   "label": "National Museum of Qatar (2019): desert-rose discs",
+   "queries": [
+    "National Museum of Qatar"
+   ],
+   "must": [
+    "national museum"
+   ],
+   "fallback": "France 24, 28 Mar 2019",
+   "files": [
+    "Rooms_of_National_museum_of_Qatar_01.ogv"
+   ]
+  },
+  {
+   "id": "12_doha_metro",
+   "time": "00:52-00:58",
+   "label": "Doha Metro (2019): train through the tunnel into a station",
+   "queries": [
+    "Doha Metro",
+    "Qatar Rail metro Doha"
+   ],
+   "must": [
+    "metro"
+   ],
+   "fallback": "AFP 8 May 2019",
+   "files": [
+    "Qatar_Doha_Metro_asv2024-10_Airport_branch_video.webm"
+   ]
+  },
+  {
+   "id": "13_world_cup_2022",
+   "time": "00:58-01:05",
+   "label": "World Cup 2022, during the tournament: fans celebrate in Doha at night",
+   "queries": [
+    "2022 FIFA World Cup Doha fans",
+    "Doha Corniche World Cup 2022",
+    "FIFA Fan Festival Doha"
+   ],
+   "must": [
+    "2022",
+    "world cup",
+    "fan"
+   ],
+   "fallback": "Getty 1448179814 (Anadolu, 10 Dec 2022) — licence needed",
+   "files": [
+    "Mundial_Qatar_2022-_Adeptos_canarinhos_confiantes_do_hexa!.webm"
+   ]
+  },
+  {
+   "id": "14_souq_waqif",
+   "time": "01:05-01:12",
+   "label": "Souq Waqif, day into evening lamps",
+   "queries": [
+    "Souq Waqif",
+    "Souq Waqif night"
+   ],
+   "must": [
+    "souq"
+   ],
+   "fallback": "original shoot",
+   "files": [
+    "Red_Carpet_-_Episode_190_-_Qatar's_Souq_Waqif_Market,_American_History_Museum,_Iona_Reine.webm",
+    "Spring_Festival_2014_Souq_Waqif.webm"
+   ]
+  },
+  {
+   "id": "15_inland_sea",
+   "time": "01:12-01:18",
+   "label": "Khor Al Adaid (Inland Sea): dunes meet the sea",
+   "queries": [
+    "Khor Al Adaid",
+    "Qatar inland sea dunes",
+    "Qatar desert dunes"
+   ],
+   "must": [
+    "adaid",
+    "udeid",
+    "inland sea",
+    "dune",
+    "desert"
+   ],
+   "fallback": "original drone shoot"
+  },
+  {
+   "id": "16_corniche_skyline",
+   "time": "01:18-01:26",
+   "label": "Corniche and West Bay, golden hour into dusk",
+   "queries": [
+    "Doha Corniche",
+    "Doha skyline",
+    "West Bay Doha"
+   ],
+   "must": [
+    "corniche",
+    "skyline",
+    "west bay",
+    "doha"
+   ],
+   "fallback": "original time-lapse",
+   "files": [
+    "Doha_Waterfront_and_Skyscraper_Panorama.ogg",
+    "Google_Timelapse-_Doha,_Qatar.webm",
+    "Corniche_Doha,_Qatar_-_scenes_before_the_National_Day_parade_2012.webm"
+   ]
+  }
+ ],
+ "notes": [
+  "2000-2006 beats (01-07): no free-licence video exists in Commons/Internet Archive — license from OCA/IGBS, Qatar TV, Reuters, AP, Getty (see ARCHIVE_SOURCING.md).",
+  "Share-alike (CC BY-SA, Free Art License) clips need legal sign-off before use in the film.",
+  "Architecture in Qatar: no freedom of panorama — modern-building footage may need owner clearance (Qatar Museums, HIA)."
+ ]
 }

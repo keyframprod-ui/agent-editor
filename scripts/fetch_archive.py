@@ -68,6 +68,32 @@ def commons_search(query: str, limit: int = 12) -> list[dict]:
     return out
 
 
+def commons_files(titles: list[str]) -> list[dict]:
+    """Exact Commons files named in the plan (clips already vetted by archive research)."""
+    if not titles:
+        return []
+    url = "https://commons.wikimedia.org/w/api.php?" + urllib.parse.urlencode({
+        "action": "query", "titles": "|".join("File:" + t.removeprefix("File:") for t in titles),
+        "prop": "videoinfo", "viprop": "url|size|extmetadata|derivatives", "format": "json"})
+    d = get_json(url)
+    out = []
+    for p in (d.get("query", {}).get("pages", {}) or {}).values():
+        vi = (p.get("videoinfo") or [{}])[0]
+        if not vi:
+            print(f"   ! not found on Commons: {p.get('title')}")
+            continue
+        em = vi.get("extmetadata", {})
+        ders = {x.get("transcodekey", ""): x["src"] for x in vi.get("derivatives", [])}
+        best = next((ders[k] for k in ("1080p.vp9.webm", "1080p.webm", "720p.vp9.webm", "720p.webm") if k in ders), vi.get("url"))
+        out.append({"source": "Wikimedia Commons", "title": p["title"].removeprefix("File:"),
+                    "license": strip(em.get("LicenseShortName", {}).get("value", "")),
+                    "creator": strip(em.get("Artist", {}).get("value", ""))[:120],
+                    "date": strip(em.get("DateTimeOriginal", {}).get("value", ""))[:40],
+                    "duration": vi.get("duration") or 0, "width": vi.get("width") or 0, "height": vi.get("height") or 0,
+                    "page": vi.get("descriptionurl"), "download": best, "size": vi.get("size") or 0, "description": "", "vetted": True})
+    return out
+
+
 def ia_search(query: str, limit: int = 10) -> list[dict]:
     q = f'({query}) AND mediatype:movies AND (licenseurl:*creativecommons.org/licenses/by* OR licenseurl:*publicdomain*)'
     url = "https://archive.org/advancedsearch.php?" + urllib.parse.urlencode(
@@ -139,7 +165,7 @@ def main():
     for beat in plan["beats"]:
         print(f"\n== {beat['id']} {beat['label']}")
         report.append(f"## {beat['id']} · {beat['label']} ({beat.get('time', '')})")
-        cands = []
+        cands = commons_files(beat.get("files", []))
         for q in beat["queries"]:
             if "commons" in a.sources:
                 cands += commons_search(q); time.sleep(3)
@@ -149,7 +175,7 @@ def main():
         for c in cands:
             if c["download"] in seen or picked >= a.max_per_beat:
                 continue
-            ok, why = usable(c, beat)
+            ok, why = (True, "") if c.get("vetted") and OK_LICENSES.search(c["license"] or "") else usable(c, beat)
             if not ok:
                 continue
             seen.add(c["download"])
@@ -157,7 +183,8 @@ def main():
             name = re.sub(r"[^\w\-]+", "_", Path(c["title"]).stem)[:70] + ext
             dest = out / beat["id"] / name
             dest.parent.mkdir(exist_ok=True)
-            print(f"   + {c['title'][:70]}  [{c['license']}]  {c['width']}x{c['height']} {c['duration']:.0f}s")
+            sa = " ⚠ share-alike: legal sign-off" if re.search(r"(by-sa|free art|fal\b)", c["license"] or "", re.I) else ""
+            print(f"   + {c['title'][:70]}  [{c['license']}]  {c['width']}x{c['height']} {c['duration']:.0f}s{sa}")
             if not a.dry_run and not dest.exists():
                 if not download(c["download"], dest, a.max_mb * 1e6):
                     continue
